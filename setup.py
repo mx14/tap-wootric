@@ -19,12 +19,11 @@ setup(name='tap-wootric',
           tap-wootric=tap_wootric:main
       ''',
       packages=['tap_wootric'],
-      package_data = {
+      package_data={
           'tap_wootric/schemas': [
               "decline.json",
               "enduser.json",
               "response.json",
           ]
       },
-      include_package_data=True,
-)
+      include_package_data=True,)

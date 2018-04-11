@@ -14,7 +14,8 @@ from singer import utils
 BASE_URL = "https://api.wootric.com/v1/"
 PER_PAGE = 50
 SLIDING_WINDOW = 86400   # 86400 = 1 day in seconds
-DATETIME_FMT = "%Y-%m-%d %H:%M:%S %z"
+DATETIME_PARSE_FMT = "%Y-%m-%d %H:%M:%S %z"
+DATETIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
 
 CONFIG = {}
 STATE = {}
@@ -120,8 +121,8 @@ def gen_request(endpoint):
 
         data = resp.json()
         for row in data:
-            last_date = int(datetime.strptime(row[sort_key], DATETIME_FMT).astimezone(timezone.utc).timestamp())
-            dt = datetime.strptime(row["updated_at"], DATETIME_FMT)
+            last_date = int(datetime.strptime(row[sort_key], DATETIME_PARSE_FMT).astimezone(timezone.utc).timestamp())
+            dt = datetime.strptime(row["updated_at"], DATETIME_PARSE_FMT)
             last_updated_at = int(dt.astimezone(timezone.utc).timestamp())
             if last_updated_at > last_bookmark:
                 yield row
@@ -148,14 +149,14 @@ def gen_request(endpoint):
         if params[query_key_lt] > sync_start.timestamp():
             last_round = True
 
-    STATE[endpoint] = utils.strftime(sync_start)
+    STATE[endpoint] = utils.strftime(sync_start.astimezone(timezone.utc))
 
 
 def transform_datetimes(row):
     for key in ["created_at", "updated_at", "last_surveyed"]:
         if key in row and row[key] not in [None, ""]:
-            dt = datetime.strptime(row[key], DATETIME_FMT)
-            row[key] = utils.strftime(dt.astimezone(timezone.utc))
+            dt = datetime.strptime(row[key], DATETIME_PARSE_FMT)
+            row[key] = utils.strftime(dt.astimezone(timezone.utc), format_str=DATETIME_FMT)
 
 
 def sync_entity(entity):

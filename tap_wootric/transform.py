@@ -28,7 +28,7 @@ class Transformer(object):
         for schema in schema_list:
             try:
                 return self.transform_field(data, schema)
-            except:
+            except Exception:
                 pass
 
         raise InvalidData("{} doesn't match any of {}".format(data, schema_list))
@@ -46,7 +46,7 @@ class Transformer(object):
             for typ in type_schema:
                 try:
                     return self._type_transform(value, typ)
-                except:
+                except Exception:
                     pass
 
             raise InvalidData("{} doesn't match any of {}".format(value, type_schema))
